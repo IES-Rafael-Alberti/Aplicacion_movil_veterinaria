@@ -11,7 +11,10 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1976D2),
-        title: const Text('Carrito de compras', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Carrito de compras',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -20,14 +23,23 @@ class CartScreen extends StatelessWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: cart.items.length,
-              separatorBuilder: (_, __) => const Divider(),
+              separatorBuilder: (_, _) => const Divider(),
               itemBuilder: (context, i) {
                 final item = cart.items[i];
                 return ListTile(
-                  leading: Image.network(item.product.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
+                  leading: Image.network(
+                    item.product.imageUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
                   title: Text(item.product.name),
-                  subtitle: Text('Cantidad: ${item.quantity}\n${item.product.price.toStringAsFixed(2)} € c/u'),
-                  trailing: Text('${(item.product.price * item.quantity).toStringAsFixed(2)} €'),
+                  subtitle: Text(
+                    'Cantidad: ${item.quantity}\n${item.product.price.toStringAsFixed(2)} € c/u',
+                  ),
+                  trailing: Text(
+                    '${(item.product.price * item.quantity).toStringAsFixed(2)} €',
+                  ),
                 );
               },
             ),
@@ -42,8 +54,21 @@ class CartScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('${cart.total.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1976D2))),
+                      const Text(
+                        'Total:',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${cart.total.toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -62,7 +87,10 @@ class CartScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text('Finalizar compra', style: TextStyle(fontSize: 16, color: Colors.white)),
+                      child: const Text(
+                        'Finalizar compra',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

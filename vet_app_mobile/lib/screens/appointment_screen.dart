@@ -1,10 +1,11 @@
-
 import 'package:flutter/material.dart';
 import '../models/mock_data.dart';
 import '../models/appointment_model.dart';
 import 'appointment_history_screen.dart';
 
 class AppointmentScreen extends StatelessWidget {
+  const AppointmentScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return _AppointmentForm();
@@ -32,6 +33,15 @@ class _AppointmentFormState extends State<_AppointmentForm> {
     selectedAnimalType = animalTypes.first;
   }
 
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    reasonController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickDateTime(BuildContext context) async {
     final date = await showDatePicker(
       context: context,
@@ -39,18 +49,22 @@ class _AppointmentFormState extends State<_AppointmentForm> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay(hour: 10, minute: 0),
-      );
-      if (time != null) {
-        setState(() {
-          selectedDate = date;
-          selectedTime = time;
-        });
-      }
+    if (!context.mounted || date == null) {
+      return;
     }
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 10, minute: 0),
+    );
+    if (!context.mounted || time == null) {
+      return;
+    }
+
+    setState(() {
+      selectedDate = date;
+      selectedTime = time;
+    });
   }
 
   @override
@@ -59,7 +73,10 @@ class _AppointmentFormState extends State<_AppointmentForm> {
       backgroundColor: const Color(0xFFE3F2FD),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1976D2),
-        title: const Text('Pedir cita veterinaria', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Pedir cita veterinaria',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -69,7 +86,9 @@ class _AppointmentFormState extends State<_AppointmentForm> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AppointmentHistoryScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const AppointmentHistoryScreen(),
+                ),
               );
             },
           ),
@@ -83,12 +102,19 @@ class _AppointmentFormState extends State<_AppointmentForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Solicita tu cita', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Solicita tu cita',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 18),
                 TextFormField(
                   controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Nombre completo'),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Introduce tu nombre' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre completo',
+                  ),
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Introduce tu nombre'
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
@@ -96,9 +122,12 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                   decoration: const InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-').hasMatch(v.trim())) return 'Introduce un email válido';
-                    if (v == null || v.trim().isEmpty) return 'Introduce tu email';
-                    if (!RegExp(r'^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$').hasMatch(v.trim())) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Introduce tu email';
+                    }
+                    if (!RegExp(
+                      r'^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$',
+                    ).hasMatch(v.trim())) {
                       return 'Introduce un email válido';
                     }
                     return null;
@@ -110,39 +139,57 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                   decoration: const InputDecoration(labelText: 'Teléfono'),
                   keyboardType: TextInputType.phone,
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Introduce tu teléfono';
-                    if (!RegExp(r'^[0-9]{9,15}$').hasMatch(v.trim())) return 'Introduce un teléfono válido';
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Introduce tu teléfono';
+                    }
+                    if (!RegExp(r'^[0-9]{9,15}$').hasMatch(v.trim())) {
+                      return 'Introduce un teléfono válido';
+                    }
                     return null;
                   },
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<AnimalType>(
-                  value: selectedAnimalType,
-                  decoration: const InputDecoration(labelText: 'Tipo de animal'),
-                  items: animalTypes.map((a) => DropdownMenuItem(
-                    value: a,
-                    child: Text(a.name),
-                  )).toList(),
+                  initialValue: selectedAnimalType,
+                  decoration: const InputDecoration(
+                    labelText: 'Tipo de animal',
+                  ),
+                  items: animalTypes
+                      .map(
+                        (a) => DropdownMenuItem(value: a, child: Text(a.name)),
+                      )
+                      .toList(),
                   onChanged: (a) => setState(() => selectedAnimalType = a),
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: reasonController,
-                  decoration: const InputDecoration(labelText: 'Motivo de la cita'),
+                  decoration: const InputDecoration(
+                    labelText: 'Motivo de la cita',
+                  ),
                   maxLines: 2,
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Describe el motivo de la cita' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Describe el motivo de la cita'
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Fecha y hora'),
-                  subtitle: Text(selectedDate == null || selectedTime == null
-                      ? 'Selecciona fecha y hora'
-                      : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - ${selectedTime!.format(context)}'),
+                  subtitle: Text(
+                    selectedDate == null || selectedTime == null
+                        ? 'Selecciona fecha y hora'
+                        : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - ${selectedTime!.format(context)}',
+                  ),
                   trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1976D2)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1976D2),
+                    ),
                     onPressed: () => _pickDateTime(context),
-                    child: const Text('Elegir', style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      'Elegir',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -154,7 +201,9 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () {
-                      if (_formKey.currentState!.validate() && selectedDate != null && selectedTime != null) {
+                      if (_formKey.currentState!.validate() &&
+                          selectedDate != null &&
+                          selectedTime != null) {
                         final appointment = Appointment(
                           name: nameController.text,
                           email: emailController.text,
@@ -178,7 +227,9 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                                 Text('Teléfono: ${appointment.phone}'),
                                 Text('Animal: ${appointment.animalType.name}'),
                                 Text('Motivo: ${appointment.reason}'),
-                                Text('Fecha: ${appointment.date.day}/${appointment.date.month}/${appointment.date.year}'),
+                                Text(
+                                  'Fecha: ${appointment.date.day}/${appointment.date.month}/${appointment.date.year}',
+                                ),
                                 Text('Hora: ${appointment.time}'),
                                 const SizedBox(height: 16),
                                 const Divider(),
@@ -187,7 +238,11 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                                   children: [
                                     Icon(Icons.email, color: Color(0xFF1976D2)),
                                     SizedBox(width: 8),
-                                    Expanded(child: Text('Se ha enviado un email de confirmación a tu correo.')),
+                                    Expanded(
+                                      child: Text(
+                                        'Se ha enviado un email de confirmación a tu correo.',
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -205,7 +260,10 @@ class _AppointmentFormState extends State<_AppointmentForm> {
                         );
                       }
                     },
-                    child: const Text('Solicitar cita', style: TextStyle(fontSize: 17, color: Colors.white)),
+                    child: const Text(
+                      'Solicitar cita',
+                      style: TextStyle(fontSize: 17, color: Colors.white),
+                    ),
                   ),
                 ),
               ],

@@ -72,15 +72,16 @@ final List<ProductCategory> categories = [
   ProductCategory('Comederos'),
 ];
 
-final List<Product> products = List.generate(100, (i) {
-  final animal = animalTypes[i % animalTypes.length];
-  final category = categories[i % categories.length];
-  return Product(
-    name: 'Producto ${i + 1}',
-    description: 'Descripción del producto ${i + 1} para ${animal.name}',
-    price: 5.0 + (i % 20) * 2.5,
-    imageUrl: 'https://placehold.co/120x120?text=Prod${i + 1}',
-    category: category,
-    animalType: animal,
-  );
-});
+final List<Product> products = [
+  for (var categoryIndex = 0; categoryIndex < categories.length; categoryIndex++)
+    for (var animalIndex = 0; animalIndex < animalTypes.length; animalIndex++)
+      Product(
+        name: '${categories[categoryIndex].name} ${animalTypes[animalIndex].name} ${categoryIndex + 1}-${animalIndex + 1}',
+        description:
+            '${categories[categoryIndex].name} para ${animalTypes[animalIndex].name}: producto recomendado para cuidado diario, bienestar y salud.',
+        price: double.parse((6.0 + ((categoryIndex * 3 + animalIndex) % 28) * 1.65).toStringAsFixed(2)),
+        imageUrl: 'https://picsum.photos/seed/prod-${categoryIndex + 1}-${animalIndex + 1}/300/300',
+        category: categories[categoryIndex],
+        animalType: animalTypes[animalIndex],
+      ),
+];

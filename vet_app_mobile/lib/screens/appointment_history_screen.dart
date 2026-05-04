@@ -10,7 +10,10 @@ class AppointmentHistoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1976D2),
-        title: const Text('Historial de citas', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Historial de citas',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -19,12 +22,17 @@ class AppointmentHistoryScreen extends StatelessWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: appointments.length,
-              separatorBuilder: (_, __) => const Divider(),
+              separatorBuilder: (_, _) => const Divider(),
               itemBuilder: (context, i) {
                 final a = appointments[i];
                 return ListTile(
-                  leading: const Icon(Icons.calendar_today, color: Color(0xFF1976D2)),
-                  title: Text('${a.date.day}/${a.date.month}/${a.date.year} - ${a.time}'),
+                  leading: const Icon(
+                    Icons.calendar_today,
+                    color: Color(0xFF1976D2),
+                  ),
+                  title: Text(
+                    '${a.date.day}/${a.date.month}/${a.date.year} - ${a.time}',
+                  ),
                   subtitle: Text('${a.animalType.name} | ${a.reason}'),
                   trailing: Text(a.name),
                 );

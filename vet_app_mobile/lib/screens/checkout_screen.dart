@@ -1,21 +1,38 @@
 import 'package:flutter/material.dart';
 import '../models/cart_model.dart';
+import '../models/order_model.dart';
 
-class CheckoutScreen extends StatelessWidget {
+class CheckoutScreen extends StatefulWidget {
   final CartModel cart;
   const CheckoutScreen({required this.cart, super.key});
 
+  @override
+  State<CheckoutScreen> createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final addressController = TextEditingController();
   final cityController = TextEditingController();
   final postalController = TextEditingController();
 
   @override
+  void dispose() {
+    addressController.dispose();
+    cityController.dispose();
+    postalController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1976D2),
-        title: const Text('Confirmar pedido', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Confirmar pedido',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -26,14 +43,21 @@ class CheckoutScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Dirección de envío', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Dirección de envío',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: addressController,
                 decoration: const InputDecoration(labelText: 'Dirección'),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Introduce la dirección';
-                  if (v.trim().length < 5) return 'La dirección es demasiado corta';
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Introduce la dirección';
+                  }
+                  if (v.trim().length < 5) {
+                    return 'La dirección es demasiado corta';
+                  }
                   return null;
                 },
               ),
@@ -42,8 +66,14 @@ class CheckoutScreen extends StatelessWidget {
                 controller: cityController,
                 decoration: const InputDecoration(labelText: 'Ciudad'),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Introduce la ciudad';
-                  if (!RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,}$').hasMatch(v.trim())) return 'Introduce un nombre de ciudad válido';
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Introduce la ciudad';
+                  }
+                  if (!RegExp(
+                    r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,}$',
+                  ).hasMatch(v.trim())) {
+                    return 'Introduce un nombre de ciudad válido';
+                  }
                   return null;
                 },
               ),
@@ -53,25 +83,39 @@ class CheckoutScreen extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Código postal'),
                 keyboardType: TextInputType.number,
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Introduce el código postal';
-                  if (!RegExp(r'^[0-9]{5}$').hasMatch(v.trim())) return 'El código postal debe tener 5 dígitos';
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Introduce el código postal';
+                  }
+                  if (!RegExp(r'^[0-9]{5}$').hasMatch(v.trim())) {
+                    return 'El código postal debe tener 5 dígitos';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              const Text('Resumen del pedido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Resumen del pedido',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.separated(
-                  itemCount: cart.items.length,
-                  separatorBuilder: (_, __) => const Divider(),
+                  itemCount: widget.cart.items.length,
+                  separatorBuilder: (_, _) => const Divider(),
                   itemBuilder: (context, i) {
-                    final item = cart.items[i];
+                    final item = widget.cart.items[i];
                     return ListTile(
-                      leading: Image.network(item.product.imageUrl, width: 40, height: 40, fit: BoxFit.cover),
+                      leading: Image.network(
+                        item.product.imageUrl,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                      ),
                       title: Text(item.product.name),
                       subtitle: Text('Cantidad: ${item.quantity}'),
-                      trailing: Text('${(item.product.price * item.quantity).toStringAsFixed(2)} €'),
+                      trailing: Text(
+                        '${(item.product.price * item.quantity).toStringAsFixed(2)} €',
+                      ),
                     );
                   },
                 ),
@@ -80,8 +124,18 @@ class CheckoutScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('${cart.total.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1976D2))),
+                  const Text(
+                    'Total:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${widget.cart.total.toStringAsFixed(2)} €',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -94,6 +148,17 @@ class CheckoutScreen extends StatelessWidget {
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      final pageContext = context;
+                      final order = OrderRecord(
+                        address: addressController.text.trim(),
+                        city: cityController.text.trim(),
+                        postal: postalController.text.trim(),
+                        date: DateTime.now(),
+                        items: widget.cart.items
+                            .map(OrderLineItem.fromCartItem)
+                            .toList(),
+                      );
+                      OrderHistory.add(order);
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -102,24 +167,37 @@ class CheckoutScreen extends StatelessWidget {
                             address: addressController.text,
                             city: cityController.text,
                             postal: postalController.text,
-                            cart: cart,
+                            cart: widget.cart,
                           ),
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                                cart.clear();
+                                Navigator.of(pageContext, rootNavigator: true).pop();
+                                Navigator.of(pageContext).pop();
+                                Navigator.of(pageContext).pop();
+                                widget.cart.clear();
                               },
                               child: const Text('Aceptar'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(pageContext, rootNavigator: true).pop();
+                                Navigator.of(pageContext).pop();
+                                Navigator.of(pageContext).pop();
+                                widget.cart.clear();
+                                Navigator.pushNamed(pageContext, '/orders');
+                              },
+                              child: const Text('Ver pedidos'),
                             ),
                           ],
                         ),
                       );
                     }
                   },
-                  child: const Text('Confirmar pedido', style: TextStyle(fontSize: 17, color: Colors.white)),
+                  child: const Text(
+                    'Confirmar pedido',
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  ),
                 ),
               ),
             ],
@@ -135,7 +213,13 @@ class TicketWidget extends StatelessWidget {
   final String city;
   final String postal;
   final CartModel cart;
-  const TicketWidget({required this.address, required this.city, required this.postal, required this.cart});
+  const TicketWidget({
+    super.key,
+    required this.address,
+    required this.city,
+    required this.postal,
+    required this.cart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -145,13 +229,23 @@ class TicketWidget extends StatelessWidget {
       children: [
         const Text('¡Tu pedido ha sido confirmado y está en proceso de envío!'),
         const SizedBox(height: 12),
-        Text('Dirección de envío:', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Dirección de envío:',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         Text('$address, $city, $postal'),
         const SizedBox(height: 12),
         const Text('Productos:', style: TextStyle(fontWeight: FontWeight.bold)),
-        ...cart.items.map((item) => Text('${item.product.name} x${item.quantity} - ${(item.product.price * item.quantity).toStringAsFixed(2)} €')),
+        ...cart.items.map(
+          (item) => Text(
+            '${item.product.name} x${item.quantity} - ${(item.product.price * item.quantity).toStringAsFixed(2)} €',
+          ),
+        ),
         const SizedBox(height: 8),
-        Text('Total: ${cart.total.toStringAsFixed(2)} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          'Total: ${cart.total.toStringAsFixed(2)} €',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
